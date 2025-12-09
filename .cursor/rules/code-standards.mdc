@@ -1,0 +1,76 @@
+---
+description: Code Standards for the Rezzy Frontend
+globs: '*'
+alwaysApply: true
+---
+
+# **Code Standards for the Rezzy Frontend**
+
+- Use npm for package management.
+- Do not write comments or docstrings for functions and classes.
+- Do not write comments unless absolutely necessary to explain something that is not obvious.
+- Do not create markdown files to explain your changes unless asked.
+- Do not run `npm run build` to check for errors — use the compiler instead.
+- **Client Directive Placement**
+  Place `use client` as _low_ as possible in the component tree (leaf components only). Every import into a client component becomes a client component.
+- **Refactor for Client Components**
+  When interactivity is needed, create a **new small client component** instead of converting an entire component.
+- **Explicit Client Directives**
+  Always add `use client` explicitly to **all** client components, even if the parent is one.
+- **Server Components in Client Components**
+  You _can_ pass server components as children/props to client components; they remain server components. It’s about **imports**, not nesting.
+- **No State Management in Server Components**
+  Hooks like `useState`, `useReducer`, and Context API work **only** in client components.
+- **Never Use `use server` for Server Components**
+  Everything is server by default. Use `use server` **only** for server actions (POST endpoints). Use `server-only` to prevent server code from running on the client.
+- **Data Leaking**
+  Only pass minimal, non-sensitive data to client components.
+- **Never Hardcode Secrets**
+  Secrets in server components can still leak. Never put sensitive values in `NEXT_PUBLIC_*`.
+- **Client/Server Utils Separation**
+  Use the `server-only` package for server utilities so they can’t be imported client-side.
+- **Client Components Run on Both Sides**
+  They render on the server (SSR/SSG) then hydrate on the client. Logs appear in **both** terminal + browser.
+- **Browser APIs**
+  Always guard browser APIs:
+  - `typeof window !== 'undefined'`
+  - Use `useEffect` for browser-only code
+  - Use dynamic imports with `ssr: false` when needed
+- **Hydration Errors**
+  Ensure server-rendered HTML exactly matches client output — avoid non-deterministic values.
+- **Wrapping Client Libraries**
+  If importing a client library into a server component, make a thin `use client` wrapper instead of converting the parent.
+- **Fetching Patterns**
+  - GET: Use directly in server components
+  - POST/PUT/DELETE: Use **server actions**
+  - Route handlers: Only for webhooks or external API callbacks
+- **No Waterfall Fetching**
+  Use `Promise.all()` for parallel data fetching.
+- **Caching**
+  Next.js caches fetches automatically. Bust cache using `revalidatePath()` or `revalidateTag()` after mutations.
+- **Server Actions Everywhere**
+  Server actions work in **both** server and client components. Use `useTransition` for pending states in clients.
+- **Always Validate Server Actions**
+  Validate with Zod or similar. Check auth in **every** server action.
+- **Route Parameters**
+  - `params`: dynamic segments
+  - `searchParams`: available in server components for query strings
+- **SearchParams Performance**
+  Using `searchParams` in server components causes dynamic rendering (network request).
+  Use `useSearchParams()` in client components for faster reads.
+- **Always Handle Loading**
+  Use `loading.tsx` or `<Suspense>` for async components.
+- **Granular Suspense**
+  Wrap **only the slow parts**, not whole pages.
+- **Suspense Placement**
+  Suspense should be **above** the async component, not inside it.
+- **Suspense Keys**
+  Use `key` to invalidate and rerender when dependencies change.
+- **Avoid Accidental Dynamic Rendering**
+  These make components dynamic:
+  - Using `searchParams`, `cookies()`, `headers()`
+  - Doing auth inside components instead of middleware
+- **Static Rendering is Default**
+  Prefer static unless dynamic is required.
+- **redirect() Outside try/catch**
+  Never wrap `redirect()` in a try/catch — it must throw.
